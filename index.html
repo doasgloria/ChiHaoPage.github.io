@@ -1,310 +1,533 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>自適應網格畫廊</title>
+    <title>嘉竣生活百貨</title>
     <style>
-        * {
+        /* 基礎樣式 */
+        body {
+            font-family: 'Arial', 'Microsoft JhengHei', sans-serif;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            line-height: 1.6;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
             min-height: 100vh;
-            padding: 20px;
         }
+        
+        /* 主要內容容器 */
+        .main-container {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            min-height: 100vh;
+            margin: 20px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+        
+        /* 美化標題區域 */
+        header {
+            background: linear-gradient(135deg, #f9fbff 0%, #e8f0f7 100%);
+            color: #2c3e50;
+            padding: 2rem 1rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        /* 添加動態背景元素 */
+        header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="20" r="3" fill="rgba(255,255,255,0.05)"/><circle cx="40" cy="60" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="90" cy="80" r="2" fill="rgba(255,255,255,0.08)"/><circle cx="10" cy="80" r="1" fill="rgba(255,255,255,0.1)"/></svg>');
+            animation: float 20s ease-in-out infinite;
+            pointer-events: none;
+        }
+        
+header h1 {
+    margin: 0;
+    font-size: 2.8rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    position: relative;
+    z-index: 1;
+    color: #2c3e50;
 
-        .container {
+    /* 多層陰影營造 3D 立體感 */
+    text-shadow: 
+        2px 2px 6px rgba(0,0,0,0.35),   /* 主陰影 */
+        -1px -1px 2px rgba(255,255,255,0.8); /* 亮面高光 */
+}
+        
+        header .subtitle {
+            margin-top: 10px;
+            font-size: 1.1rem;
+            opacity: 0.9;
+            font-weight: 300;
+            letter-spacing: 1px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* 導覽列與標籤 */
+        nav {
+            background: linear-gradient(90deg, #34495e 0%, #2c3e50 100%);
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        nav button {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 0 20px 8px 0;
+            cursor: pointer;
+            border-radius: 25px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+        }
+        
+        nav button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+            background: linear-gradient(135deg, #5dade2 0%, #3498db 100%);
+        }
+        
+        nav button:active {
+            transform: translateY(0);
+        }
+        
+        /* 載入中樣式 */
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            font-size: 1.3rem;
+            color: #7f8c8d;
+            background: white;
+            border-radius: 15px;
+            margin: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        
+        /* 商品網格 */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+            padding: 30px;
             max-width: 1200px;
             margin: 0 auto;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(10px);
         }
-
-        .header {
-            text-align: center;
-            margin-bottom: 50px;
-        }
-
-        .header h1 {
-            font-size: 2.5em;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-
-        .header p {
-            color: #666;
-            font-size: 1.1em;
-            opacity: 0.8;
-        }
-
-        .gallery {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 25px;
-            margin-bottom: 30px;
-        }
-
-        .gallery-item {
-            position: relative;
-            aspect-ratio: 1;
+        
+        .product-item {
+            background: white;
             border-radius: 15px;
-            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            text-align: center;
+            padding: 20px;
             cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-        }
-
-        .gallery-item:hover {
-            transform: translateY(-10px) scale(1.02);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
-        }
-
-        .gallery-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.4s ease;
-        }
-
-        .gallery-item:hover img {
-            transform: scale(1.1);
-        }
-
-        .gallery-item .overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(45deg, rgba(102, 126, 234, 0.8), rgba(118, 75, 162, 0.8));
+            transition: all 0.3s ease;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.3s ease;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            border: 1px solid rgba(0,0,0,0.05);
         }
-
-        .gallery-item:hover .overlay {
-            opacity: 1;
+        
+        .product-item:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.15);
+            border-color: #3498db;
         }
-
-        .overlay-text {
-            color: white;
-            font-size: 1.2em;
+        
+        .product-item img {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+            transition: transform 0.3s ease;
+        }
+        
+        .product-item:hover img {
+            transform: scale(1.05);
+        }
+        
+        .product-item h3 {
+            margin: 15px 0;
+            font-size: 1.3rem;
+            color: #2c3e50;
             font-weight: 600;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         }
-
-        /* 燈箱效果 */
-        .lightbox {
-            display: none;
+        
+        .product-item .price {
+            font-size: 1.6rem;
+            color: #e74c3c;
+            font-weight: 700;
+            text-shadow: 1px 1px 2px rgba(231, 76, 60, 0.1);
+        }
+        
+        /* 標籤樣式 */
+        .product-tag {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+            z-index: 10;
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        /* Lightbox保持原樣但稍作美化 */
+        .lightbox-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            z-index: 1000;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            display: none;
             justify-content: center;
             align-items: center;
+            z-index: 1000;
+            overflow-y: auto;
         }
+        
+.lightbox-content {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    max-width: 600px; /* 電腦上最大寬度 */
+    width: 90%;       /* 預設佔九成 */
+    position: relative;
+    animation: fadeIn 0.3s ease-in-out;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    max-height: 90vh;
+    overflow-y: auto;
+}
 
-        .lightbox.active {
-            display: flex;
-        }
-
-        .lightbox-content {
-            max-width: 90%;
-            max-height: 90%;
-            border-radius: 10px;
-            box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
-        }
-
-        .close-btn {
+/* 📱 手機版 (小於 768px) */
+@media (max-width: 768px) {
+    .lightbox-content {
+        width: 75%;        /* 寬度從 85% → 75%，左右露更多 */
+        max-width: 360px;  /* 限制最大寬度 */
+        max-height: 80vh;  /* 高度縮到 80% 螢幕，讓上下露黑邊 */
+        padding: 16px;     /* 內容內距也縮小一點，避免太擠 */
+    }
+}
+        
+        .lightbox-close {
             position: absolute;
-            top: 20px;
-            right: 30px;
-            color: white;
-            font-size: 30px;
+            top: 15px;
+            right: 25px;
+            font-size: 2rem;
             cursor: pointer;
-            z-index: 1001;
-            transition: transform 0.2s ease;
+            color: #bdc3c7;
+            transition: color 0.3s;
+            z-index: 100;
         }
-
-        .close-btn:hover {
-            transform: scale(1.2);
+        
+        .lightbox-close:hover {
+            color: #e74c3c;
         }
-
-        /* 手機版調整 */
-        @media (max-width: 768px) {
-            body {
-                padding: 10px;
-            }
-
-            .container {
-                padding: 20px;
-                border-radius: 15px;
-            }
-
-            .header h1 {
-                font-size: 2em;
-            }
-
-            .gallery {
-                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-                gap: 15px;
-            }
-
-            .gallery-item {
-                border-radius: 10px;
-            }
-
-            .overlay-text {
-                font-size: 1em;
-            }
-
-            .close-btn {
-                top: 10px;
-                right: 20px;
-                font-size: 25px;
-            }
+        
+        .lightbox-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
         }
-
-        /* 超小螢幕 */
-        @media (max-width: 480px) {
-            .header h1 {
-                font-size: 1.8em;
-            }
-
-            .gallery {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 10px;
-            }
-
-            .container {
-                padding: 15px;
-            }
+        
+        .lightbox-content h2 {
+            margin-top: 0;
+            color: #2c3e50;
+            font-size: 1.8rem;
+            font-weight: 600;
         }
-
-        /* 載入動畫 */
-        .gallery-item {
-            animation: fadeInUp 0.6s ease forwards;
-            opacity: 0;
-            transform: translateY(30px);
+        
+        .lightbox-content .lightbox-price {
+            font-size: 2rem;
+            color: #e74c3c;
+            font-weight: bold;
+            margin-top: 10px;
+            margin-bottom: 20px;
         }
-
-        .gallery-item:nth-child(1) { animation-delay: 0.1s; }
-        .gallery-item:nth-child(2) { animation-delay: 0.2s; }
-        .gallery-item:nth-child(3) { animation-delay: 0.3s; }
-        .gallery-item:nth-child(4) { animation-delay: 0.4s; }
-        .gallery-item:nth-child(5) { animation-delay: 0.5s; }
-        .gallery-item:nth-child(6) { animation-delay: 0.6s; }
-
-        @keyframes fadeInUp {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        
+        .lightbox-details {
+            margin-top: 20px;
+            line-height: 1.6;
         }
+        
+        .lightbox-details h4 {
+            margin-bottom: 10px;
+            color: #34495e;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        .lightbox-details ul {
+            padding-left: 0;
+            list-style: none;
+        }
+        
+        .lightbox-details ul li {
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #ecf0f1 0%, #bdc3c7 100%);
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 1rem;
+            color: #2c3e50;
+            border-left: 4px solid #3498db;
+        }
+        
+        /* 底部資訊 */
+        footer {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            text-align: center;
+            padding: 2.5rem;
+            margin-top: 30px;
+        }
+        
+        footer p {
+            margin: 8px 0;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        /* 動畫 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+@media (max-width: 768px) {
+    .main-container {
+        margin: 10px;
+        border-radius: 15px;
+    }
+    
+    header h1 {
+        font-size: 2.2rem;
+    }
+    
+    .product-grid {
+        grid-template-columns: 1fr;
+        padding: 20px;
+    }
+    
+    nav {
+        /* Add these two lines */
+        white-space: nowrap;
+        overflow-x: auto;
+    }
+    
+    nav button {
+        margin: 5px;
+        padding: 10px 20px;
+    }
+    
+    /* Optional: Hide scrollbar for a cleaner look */
+    nav::-webkit-scrollbar {
+        display: none;
+    }
+    nav {
+        -ms-overflow-style: none; /* IE and Edge */
+        scrollbar-width: none; /* Firefox */
+    }
+}
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>志豪の斷腿商店</h1>
-            <p>各種內置外置方案可選擇</p>
-        </div>
 
-        <div class="gallery" id="gallery">
-            <div class="gallery-item" onclick="openLightbox('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80')">
-                <img src="Limb.png" alt="山脈風景">
-                <div class="overlay">
-                    <div class="overlay-text">壯麗山脈</div>
-                </div>
-            </div>
+    <div class="main-container">
+        <header>
+            <h1>嘉竣生活百貨</h1>
+            <div class="subtitle">品質生活 ・ 精選好物</div>
+        </header>
 
-            <div class="gallery-item" onclick="openLightbox('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80')">
-                <img src="Limb.png" alt="海灘風景">
-                <div class="overlay">
-                    <div class="overlay-text">熱帶海灘</div>
-                </div>
-            </div>
+        <nav>
+            <button onclick="filterProducts('all')">所有商品</button>
+            <button onclick="filterProducts('light')">照明燈</button>
+            <button onclick="filterProducts('electronics')">電子產品</button>
+            <button onclick="filterProducts('beauty')">美妝按摩</button>
+            <button onclick="filterProducts('sleep')">寢具</button>            
+        </nav>
 
-            <div class="gallery-item" onclick="openLightbox('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80')">
-                <img src="Limb.png" alt="森林風景">
-                <div class="overlay">
-                    <div class="overlay-text">神秘森林</div>
-                </div>
-            </div>
+        <main class="product-grid">
+            <div class="loading">載入商品中...</div>
+        </main>
 
-            <div class="gallery-item" onclick="openLightbox('https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80')">
-                <img src="Limb.png" alt="湖泊風景">
-                <div class="overlay">
-                    <div class="overlay-text">寧靜湖泊</div>
-                </div>
-            </div>
-
-            <div class="gallery-item" onclick="openLightbox('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80')">
-                <img src="Limb.png" alt="花田風景">
-                <div class="overlay">
-                    <div class="overlay-text">花海田園</div>
-                </div>
-            </div>
-
-            <div class="gallery-item" onclick="openLightbox('https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80')">
-                <img src="Limb.png" alt="沙漠風景">
-                <div class="overlay">
-                    <div class="overlay-text">浩瀚沙漠</div>
+        <div class="lightbox-overlay" onclick="closeLightbox()">
+            <div class="lightbox-content" onclick="event.stopPropagation()">
+                <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
+                <img id="lightbox-image" src="" alt="商品圖片">
+                <h2 id="lightbox-name"></h2>
+                <p class="lightbox-price" id="lightbox-price"></p>
+                <div class="lightbox-details">
+                    <h4><span role="img" aria-label="info">ℹ️</span> 產品說明</h4>
+                    <p id="lightbox-introduce"></p>
+                    <h4><span role="img" aria-label="star">📌</span> 附加規格</h4>
+                    <ul id="lightbox-addition"></ul>
                 </div>
             </div>
         </div>
+
+        <footer>
+            <p>公司名稱：嘉竣有限公司</p>
+            <p>地址：桃園市中壢區環北路400號5樓之2</p>
+            <p>電話：0965-340497</p>
+            <p>Line ID：@rhy7665e</p>
+        </footer>
     </div>
 
-    <!-- 燈箱 -->
-    <div class="lightbox" id="lightbox" onclick="closeLightbox()">
-        <span class="close-btn">&times;</span>
-        <img class="lightbox-content" id="lightbox-img" src="" alt="">
-    </div>
+<script>
+    // 全域商品資料陣列
+    let products = [];
+    
+    const productGrid = document.querySelector('.product-grid');
+    const lightboxOverlay = document.querySelector('.lightbox-overlay');
+    const lightboxImage = document.getElementById('lightbox-image');
+    const lightboxName = document.getElementById('lightbox-name');
+    const lightboxPrice = document.getElementById('lightbox-price');
+    const lightboxIntroduce = document.getElementById('lightbox-introduce');
+    const lightboxAddition = document.getElementById('lightbox-addition');
 
-    <script>
-        function openLightbox(src) {
-            const lightbox = document.getElementById('lightbox');
-            const lightboxImg = document.getElementById('lightbox-img');
-            lightboxImg.src = src;
-            lightbox.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeLightbox() {
-            const lightbox = document.getElementById('lightbox');
-            lightbox.classList.remove('active');
-            document.body.style.overflow = 'auto';
-        }
-
-        // ESC鍵關閉燈箱
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closeLightbox();
+    // 載入商品資料
+    async function loadProducts() {
+        try {
+            console.log('開始載入商品清單...');
+            
+            // 先載入商品清單
+            const response = await fetch('./products.json');
+            if (!response.ok) {
+                throw new Error(`載入 products.json 失敗: ${response.status}`);
             }
+            
+            const data = await response.json();
+            console.log('商品清單載入成功:', data);
+            
+            // 載入每個商品的詳細資料
+            const productPromises = data.products.map(async (productPath) => {
+                console.log('載入商品:', productPath);
+                const productResponse = await fetch('./' + productPath);
+                if (!productResponse.ok) {
+                    throw new Error(`載入 ${productPath} 失敗: ${productResponse.status}`);
+                }
+                return await productResponse.json();
+            });
+            
+            // 等待所有商品載入完成
+            products = await Promise.all(productPromises);
+            console.log('所有商品載入完成:', products);
+            
+            // 顯示商品
+            displayProducts(products);
+        } catch (error) {
+            console.error('載入商品資料失敗:', error);
+            productGrid.innerHTML = `
+                <div class="loading">
+                    載入商品失敗: ${error.message}<br>
+                    請檢查 Console 查看詳細錯誤訊息，並確認檔案路徑是否正確
+                </div>
+            `;
+        }
+    }
+
+    // 顯示商品
+    function displayProducts(filteredProducts) {
+        productGrid.innerHTML = '';
+        filteredProducts.forEach(product => {
+            const item = document.createElement('div');
+            item.className = 'product-item';
+            item.setAttribute('data-name', product.name);
+
+            // 根據商品是否有 tag 屬性來動態生成標籤
+            const tagHtml = product.tag ? `<div class="product-tag">${product.tag}</div>` : '';
+
+            // 決定圖片檔名：優先使用 image 屬性，否則使用 name
+            const imageName = product.image || product.name;
+            
+            item.innerHTML = `
+                ${tagHtml}
+                <img src="./images/${imageName}.avif" alt="${product.name}">
+                <h3>${product.name}</h3>
+                <p class="price">NT$ ${product.Price}</p>
+            `;
+
+            item.addEventListener('click', () => {
+                openLightbox(product);
+            });
+
+            productGrid.appendChild(item);
+        });
+    }
+
+    // 篩選商品
+    function filterProducts(category) {
+        const filtered = category === 'all'
+            ? products
+            : products.filter(p => p.catg === category);
+        displayProducts(filtered);
+    }
+
+    // 打開 Lightbox
+    function openLightbox(product) {
+        const imageName = product.image || product.name;
+        lightboxImage.src = `./images/${imageName}.avif`;
+        lightboxImage.alt = product.name;
+        lightboxName.textContent = product.name;
+        lightboxPrice.textContent = `NT$ ${product.Price}`;
+        lightboxIntroduce.textContent = product.introduce;
+        
+        lightboxAddition.innerHTML = '';
+        
+
+
+        product.addition.forEach(detail => {
+            const li = document.createElement('li');
+            li.textContent = `⭐ ${detail}`;
+            lightboxAddition.appendChild(li);
         });
 
-        // 防止點擊圖片時關閉燈箱
-        document.getElementById('lightbox-img').addEventListener('click', function(e) {
-            e.stopPropagation();
-        });
-    </script>
+        lightboxOverlay.style.display = 'flex';
+        lightboxOverlay.scrollIntoView({ behavior: "smooth", block: "center" });
+        document.querySelector(".lightbox-content").scrollTop = 0;
+    }
+
+    // 關閉 Lightbox
+    function closeLightbox() {
+        lightboxOverlay.style.display = 'none';
+    }
+
+    // 網頁載入時載入商品資料
+    document.addEventListener('DOMContentLoaded', () => {
+        loadProducts();
+    });
+</script>
+
 </body>
 </html>
